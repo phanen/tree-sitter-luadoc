@@ -53,7 +53,7 @@ module.exports = grammar({
     class_annotation: $ => seq(
       '@class',
       optional('(exact)'),
-      $.type,
+      $.type_identifier,
       optional(seq(':', commaSep1($.type))),
       optional(choice($.class_at_comment, $.comment)),
     ),
@@ -74,7 +74,7 @@ module.exports = grammar({
 
     alias_annotation: $ => seq(
       '@alias',
-      $.identifier,
+      $.type_identifier,
       $.type,
       optional(choice($.at_comment, $.comment)),
     ),
@@ -94,6 +94,7 @@ module.exports = grammar({
     field_annotation: $ => seq(
       '@field',
       optional($.qualifier),
+      // wow indexed_field... but @type also need this...
       choice($.identifier, $.positional_field, $.indexed_field),
       optional('?'),
       $.type,
@@ -162,6 +163,7 @@ module.exports = grammar({
 
     deprecated_annotation: $ => seq('@deprecated', optional(seq(optional(':'), $.comment))),
 
+    // also @cast/@type/@alias/@class... <type>
     cast_annotation: $ => seq(
       '@cast',
       $.identifier,
@@ -173,7 +175,7 @@ module.exports = grammar({
 
     overload_annotation: $ => seq('@overload', $.function_type, optional($.comment)),
 
-    enum_annotation: $ => seq('@enum', optional('(key)'), $.identifier, optional($.comment)),
+    enum_annotation: $ => seq('@enum', optional('(key)'), $.type_identifier, optional($.comment)),
 
     language_injection: $ => seq('@language', $.identifier, optional($.comment)),
 
@@ -210,7 +212,7 @@ module.exports = grammar({
 
     class_at_comment: $ => seq(
       '@',
-      $.identifier,
+      $.type_identifier,
       optional(seq('extends', $.identifier)),
       optional($.comment),
     ),
@@ -221,12 +223,13 @@ module.exports = grammar({
 
     type: $ => prec.right(choice(
       $.builtin_type,
-      $.identifier,
+      $.type_identifier,
       $.array_type,
       $.table_type,
       $.table_literal_type,
       $.union_type,
       $.parenthesized_type,
+      $.bracketed_type,
       $.tuple_type,
       $.function_type,
       $.member_type,
@@ -269,6 +272,8 @@ module.exports = grammar({
 
     parenthesized_type: $ => seq('(', $.type, ')'),
 
+    bracketed_type: $ => seq('[', commaSep1($.type), ']'),
+
     tuple_type: $ => seq('(', commaSep2($.type), ')'),
 
     function_type: $ => prec.right(seq(
@@ -301,6 +306,7 @@ module.exports = grammar({
       seq('\'', /[^']*/, '\''),
     ),
 
+    // ???
     custom_type: $ => seq('`', $.identifier, '`'),
 
     builtin_type: _ => prec.right(choice(
@@ -332,6 +338,8 @@ module.exports = grammar({
     identifier: _ => /[a-zA-Z_][a-zA-Z0-9_]*/,
 
     diagnostic_identifier: _ => /[a-zA-Z_][a-zA-Z0-9_-]*/,
+
+    type_identifier: _ => /[a-zA-Z_][a-zA-Z0-9._-]*/,
   },
 });
 
