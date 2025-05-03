@@ -329,7 +329,7 @@ module.exports = grammar({
 
     indexed_field: $ => seq('[', choice($.identifier, $.string), ']'),
 
-    identifier: _ => /[a-zA-Z_][a-zA-Z0-9_]*/,
+    identifier: _ => /[a-zA-Z_][a-zA-Z0-9_-]*/,
 
     diagnostic_identifier: _ => /[a-zA-Z_][a-zA-Z0-9_-]*/,
   },

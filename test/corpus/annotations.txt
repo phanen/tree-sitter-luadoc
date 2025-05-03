@@ -95,7 +95,7 @@ Test a Return Annotation
 Test a Type Annotation
 =======================
 
-@type Car
+@type Car-Car
 
 ---
 
